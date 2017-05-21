@@ -41,17 +41,37 @@ summary(mod)
 #library(car)
 #vif(mod)
 
-##AUC##
+##AUC for training data set##
 pred_test<-predict(mod, type = "response", newdata = train)
+library(ROCR)
+p1<-prediction(pred_train, train$DV)
+auc<-performance(p1, "auc")
+auc<-unlist(slot(auc, "y.values"))
+auc
+
+
+##Classification Matrix for training data set##
+p1<-prediction(pred_train, train$DV)
+p2<-performance(p1, "tpr", "fpr")
+plot(p2, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
+
+#Labeling high and no heart risk patients using cut off as 0.6##
+pred_train_label<-ifelse(pred_train>=0.6, "High Risk", "No Risk")
+head(pred_train_label, 20)
+
+##Confusion Matrix for training data set##
+table(pred_train_label, train$DV)
+
+##AUC for test data set##
+pred_test<-predict(mod, type = "response", newdata = test)
 library(ROCR)
 p1<-prediction(pred_test, train$DV)
 auc<-performance(p1, "auc")
 auc<-unlist(slot(auc, "y.values"))
 auc
 
-
-##Classification Matrix= 0.6##
-p1<-prediction(pred_test, train$DV)
+##Classification Matrix for test data set##
+p1<-prediction(pred_test, test$DV)
 p2<-performance(p1, "tpr", "fpr")
 plot(p2, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
 
@@ -60,9 +80,8 @@ plot(p2, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
 pred_test_label<-ifelse(pred_test>=0.6, "High Risk", "No Risk")
 head(pred_test_label, 20)
 
-##Confusion Matrix##
+##Confusion Matrix for train data set##
 table(pred_test_label, train$DV)
-
 
 ##Model interpretation and recommendation ##
 
